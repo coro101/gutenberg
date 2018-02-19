@@ -140,7 +140,7 @@ function getEmbedBlockSettings( { title, icon, category = 'embed', transforms, k
 
 				if ( fetching ) {
 					return (
-						<div key="loading" className="wp-block-embed is-loading">
+						<div className="wp-block-embed is-loading">
 							<Spinner />
 							<p>{ __( 'Embedding…' ) }</p>
 						</div>
@@ -180,7 +180,7 @@ function getEmbedBlockSettings( { title, icon, category = 'embed', transforms, k
 				}
 
 				return (
-					<figure key="embed" className={ typeClassName }>
+					<figure className={ typeClassName }>
 						{ ( cannotPreview ) ? (
 							<Placeholder icon={ icon } label={ __( 'Embed URL' ) }>
 								<p className="components-placeholder__error"><a href={ url }>{ url }</a></p>
