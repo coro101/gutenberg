@@ -60,9 +60,9 @@ export const settings = {
 	},
 
 	save( { attributes } ) {
-		const { content, align } = attributes;
+		const { content } = attributes;
 		return (
-			<table className={ align ? `align${ align }` : null }>
+			<table>
 				{ content }
 			</table>
 		);
