@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { BEGIN, COMMIT, REVERT } from 'redux-optimist';
-import { get, has, includes, map, castArray, uniqueId, reduce, values, some } from 'lodash';
+import { get, has, includes, castArray, uniqueId, reduce, values, some } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -16,6 +16,8 @@ import {
 	createReusableBlock,
 	isReusableBlock,
 	getDefaultBlockName,
+	doesBlocksMatchTemplate,
+	synchronizeBlocksWithTemplate,
 } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
@@ -39,6 +41,8 @@ import {
 	insertBlock,
 	setMetaBoxSavedData,
 	selectBlock,
+	resetBlocks,
+	setTemplateValidity,
 } from './actions';
 import {
 	getCurrentPost,
@@ -52,9 +56,11 @@ import {
 	getBlock,
 	getBlocks,
 	getReusableBlock,
+	getTemplate,
 	getMetaBoxes,
 	hasMetaBoxes,
 	POST_UPDATE_TRANSACTION_ID,
+	getTemplateLock,
 } from './selectors';
 import { getMetaBoxContainer } from '../utils/meta-boxes';
 
@@ -287,19 +293,16 @@ export default {
 
 		// Parse content as blocks
 		let blocks;
+		let isValidTemplate = true;
 		if ( post.content.raw ) {
 			blocks = parse( post.content.raw );
+			isValidTemplate = (
+				! settings.template ||
+				settings.templateLock !== 'all' ||
+				doesBlocksMatchTemplate( blocks, settings.template )
+			);
 		} else if ( settings.template ) {
-			const createBlocksFromTemplate = ( template ) => {
-				return map( template, ( [ name, attributes, innerBlocksTemplate ] ) => {
-					return createBlock(
-						name,
-						attributes,
-						createBlocksFromTemplate( innerBlocksTemplate )
-					);
-				} );
-			};
-			blocks = createBlocksFromTemplate( settings.template );
+			blocks = synchronizeBlocksWithTemplate( [], settings.template );
 		} else {
 			blocks = [];
 		}
@@ -311,7 +314,31 @@ export default {
 			edits.status = 'draft';
 		}
 
-		return setupEditorState( post, blocks, edits );
+		return setupEditorState( post, blocks, edits, isValidTemplate );
+	},
+	SYNCHRONIZE_TEMPLATE( action, { getState } ) {
+		const state = getState();
+		const blocks = getBlocks( state );
+		const template = getTemplate( state );
+		const updatedBlockList = synchronizeBlocksWithTemplate( blocks, template );
+
+		return [
+			resetBlocks( updatedBlockList ),
+			setTemplateValidity( true ),
+		];
+	},
+	CHECK_TEMPLATE_VALIDITY( action, { getState } ) {
+		const state = getState();
+		const blocks = getBlocks( state );
+		const template = getTemplate( state );
+		const templateLock = getTemplateLock( state );
+		const isValid = (
+			! template ||
+			templateLock !== 'all' ||
+			doesBlocksMatchTemplate( blocks, template )
+		);
+
+		return setTemplateValidity( isValid );
 	},
 	FETCH_REUSABLE_BLOCKS( action, store ) {
 		// TODO: these are potentially undefined, this fix is in place

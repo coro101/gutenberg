@@ -31,3 +31,7 @@ export {
 export {
 	isUnmodifiedDefaultBlock,
 } from './utils';
+export {
+	doesBlocksMatchTemplate,
+	synchronizeBlocksWithTemplate,
+} from './templates';
