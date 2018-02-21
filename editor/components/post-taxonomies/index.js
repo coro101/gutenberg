@@ -2,7 +2,7 @@
  * External Dependencies
  */
 import { connect } from 'react-redux';
-import { filter, includes } from 'lodash';
+import { filter, identity, includes } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -18,24 +18,20 @@ import HierarchicalTermSelector from './hierarchical-term-selector';
 import FlatTermSelector from './flat-term-selector';
 import { getCurrentPostType } from '../../store/selectors';
 
-export function PostTaxonomies( { postType, taxonomies } ) {
+export function PostTaxonomies( { postType, taxonomies, taxonomyWrapper = identity } ) {
 	const availableTaxonomies = filter( taxonomies.data, ( taxonomy ) => includes( taxonomy.types, postType ) );
 
-	return (
-		<div>
-			{ availableTaxonomies.map( ( taxonomy ) => {
-				const TaxonomyComponent = taxonomy.hierarchical ? HierarchicalTermSelector : FlatTermSelector;
-				return (
-					<TaxonomyComponent
-						key={ taxonomy.slug }
-						label={ taxonomy.name }
-						restBase={ taxonomy.rest_base }
-						slug={ taxonomy.slug }
-					/>
-				);
-			} ) }
-		</div>
-	);
+	return availableTaxonomies.map( ( taxonomy ) => {
+		const TaxonomyComponent = taxonomy.hierarchical ? HierarchicalTermSelector : FlatTermSelector;
+		return taxonomyWrapper(
+			<TaxonomyComponent
+				key={ taxonomy.slug }
+				restBase={ taxonomy.rest_base }
+				slug={ taxonomy.slug }
+			/>,
+			taxonomy
+		);
+	} );
 }
 
 const applyConnect = connect(

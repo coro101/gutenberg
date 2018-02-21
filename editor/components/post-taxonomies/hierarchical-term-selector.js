@@ -214,7 +214,7 @@ class HierarchicalTermSelector extends Component {
 	}
 
 	render() {
-		const { label, slug, taxonomy, instanceId } = this.props;
+		const { slug, taxonomy, instanceId } = this.props;
 		const { availableTermsTree, availableTerms, formName, formParent, loading, showForm } = this.state;
 		const labelWithFallback = ( labelProperty, fallbackIsCategory, fallbackIsNotCategory ) => get(
 			taxonomy,
@@ -243,7 +243,6 @@ class HierarchicalTermSelector extends Component {
 		/* eslint-disable jsx-a11y/no-onchange */
 		return (
 			<div className="editor-post-taxonomies__hierarchical-terms-selector">
-				<h3 className="editor-post-taxonomies__hierarchical-terms-selector-title">{ label }</h3>
 				{ this.renderTerms( availableTermsTree ) }
 				{ ! loading &&
 					<button
