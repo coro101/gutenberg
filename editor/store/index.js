@@ -14,6 +14,8 @@ import {
 	getEditedPostAttribute,
 	getLastMultiSelectedBlockUid,
 	getSelectedBlockCount,
+	getCurrentPost,
+	isSavingPost,
 } from './selectors';
 
 /**
@@ -33,6 +35,8 @@ registerSelectors( MODULE_KEY, {
 	getEditedPostAttribute,
 	getLastMultiSelectedBlockUid,
 	getSelectedBlockCount,
+	getCurrentPost,
+	isSavingPost,
 } );
 
 export default store;
